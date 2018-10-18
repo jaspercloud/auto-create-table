@@ -53,13 +53,23 @@ public class CreateTableFactory {
 
         boolean hasTable = hasTable(nextMonthTable);
         if (!hasTable) {
-            createTable(monthTable, nextMonthTable);
+            createTable(monthTable, nextMonthTable, tableConfig);
         }
     }
 
-    public void createTable(String monthTable, String nextMonthTable) {
-        String createTableSql = String.format("create table %s (like %s including defaults including constraints including indexes including comments)",
-                nextMonthTable, monthTable);
+    public void createTable(String monthTable, String nextMonthTable, CreateTableConfig tableConfig) {
+        StringBuilder builder = new StringBuilder();
+        if (tableConfig.isConstraints()) {
+            builder.append(" including constraints");
+        }
+        if (tableConfig.isIndexes()) {
+            builder.append(" including indexes");
+        }
+        if (tableConfig.isComments()) {
+            builder.append(" including comments");
+        }
+        String including = builder.toString();
+        String createTableSql = String.format("create table %s (like %s including defaults %s)", nextMonthTable, monthTable, including);
         jdbcTemplate.execute(createTableSql);
     }
 
